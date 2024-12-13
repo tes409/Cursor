@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cursor Sharing</title>
+    <style>
+        body {
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .cursor {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(0, 255, 0, 0.7);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        let userId = `user-${Math.random().toString(36).substring(7)}`;  // Generate a unique ID for each session
+        let cursors = {}; // Store cursor positions
+        const cursorElements = {}; // Store HTML elements for cursors
+
+        // Track the local user's mouse movements
+        document.addEventListener('mousemove', (event) => {
+            const x = event.clientX;
+            const y = event.clientY;
+            
+            // Update the cursor position for the local user
+            updateCursor(userId, x, y);
+            saveCursorPosition(userId, x, y);
+        });
+
+        // Update or create a cursor for a user
+        function updateCursor(id, x, y) {
+            if (!cursorElements[id]) {
+                const cursorElement = document.createElement('div');
+                cursorElement.classList.add('cursor');
+                document.body.appendChild(cursorElement);
+                cursorElements[id] = cursorElement;
+            }
+            cursorElements[id].style.left = `${x}px`;
+            cursorElements[id].style.top = `${y}px`;
+        }
+
+        // Save cursor position to localStorage
+        function saveCursorPosition(id, x, y) {
+            localStorage.setItem(id, JSON.stringify({ x, y }));
+        }
+
+        // Load all stored cursor positions on page load
+        function loadAllCursors() {
+            Object.keys(localStorage).forEach((key) => {
+                const position = JSON.parse(localStorage.getItem(key));
+                updateCursor(key, position.x, position.y);
+            });
+        }
+
+        // Initialize all cursors on page load
+        window.onload = loadAllCursors;
+    </script>
+</body>
+</html>
