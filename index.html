@@ -24,7 +24,6 @@
 <body>
     <script>
         let userId = `user-${Math.random().toString(36).substring(7)}`;  // Generate a unique ID for each session
-        let cursors = {}; // Store cursor positions
         const cursorElements = {}; // Store HTML elements for cursors
 
         // Track the local user's mouse movements
@@ -54,11 +53,21 @@
             localStorage.setItem(id, JSON.stringify({ x, y }));
         }
 
+        // Listen for changes in localStorage from other tabs
+        window.addEventListener('storage', (event) => {
+            if (event.key !== userId) { // Ignore the current tab's own changes
+                const position = JSON.parse(event.newValue);
+                updateCursor(event.key, position.x, position.y);
+            }
+        });
+
         // Load all stored cursor positions on page load
         function loadAllCursors() {
             Object.keys(localStorage).forEach((key) => {
-                const position = JSON.parse(localStorage.getItem(key));
-                updateCursor(key, position.x, position.y);
+                if (key !== userId) { // Ignore the current user's own cursor
+                    const position = JSON.parse(localStorage.getItem(key));
+                    updateCursor(key, position.x, position.y);
+                }
             });
         }
 
